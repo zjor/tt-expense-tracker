@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context>
+    <!-- Database Configuration Properties -->
+    <Environment name="dbUrl" value="jdbc:postgresql://localhost/tt" type="java.lang.String"/>
+    <Environment name="dbUsername" value="test" type="java.lang.String"/>
+    <Environment name="dbPassword" value="testpassword" type="java.lang.String"/>
+
+</Context>

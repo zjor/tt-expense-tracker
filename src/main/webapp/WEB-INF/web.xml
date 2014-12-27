@@ -8,8 +8,8 @@
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>
-            classpath:beans-service.xml
-            classpath:beans-security.xml
+            classpath:persistence-context.xml
+            classpath:security-context.xml
         </param-value>
     </context-param>
     <listener>
