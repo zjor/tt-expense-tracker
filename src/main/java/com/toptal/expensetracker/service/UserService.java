@@ -2,6 +2,7 @@ package com.toptal.expensetracker.service;
 
 import com.toptal.expensetracker.model.User;
 import com.toptal.expensetracker.model.User_;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ import java.util.List;
  * @author: Sergey Royz
  * Date: 27.12.2014
  */
+@Slf4j
 @Service
 public class UserService {
 

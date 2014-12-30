@@ -23,7 +23,7 @@ public class AuthService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userService.findById(username);
+        User user = userService.findByEmail(username);
         if (user == null) {
             throw new UsernameNotFoundException(username);
         }
@@ -31,12 +31,16 @@ public class AuthService implements UserDetailsService {
         return new UserDetailsAdapter(user);
     }
 
-    public static class UserDetailsAdapter implements UserDetails{
+    public static class UserDetailsAdapter implements UserDetails {
 
         private User user;
 
         public UserDetailsAdapter(User user) {
             this.user = user;
+        }
+
+        public String getEmail() {
+            return user.getEmail();
         }
 
         @Override

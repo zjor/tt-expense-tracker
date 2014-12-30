@@ -11,7 +11,7 @@
           p:prefix="/WEB-INF/jsp/"
           p:suffix=".jsp"/>
 
-    <context:component-scan base-package="com.toptal.expensetracker"/>
+    <context:component-scan base-package="com.toptal.expensetracker.controller"/>
 
     <mvc:annotation-driven>
         <mvc:message-converters>
@@ -20,6 +20,7 @@
     </mvc:annotation-driven>
 
     <mvc:view-controller path="/" view-name="index"/>
+    <mvc:view-controller path="/register" view-name="registration"/>
     <mvc:view-controller path="/tracker" view-name="tracker"/>
 
     <mvc:resources mapping="/static/**" location="/WEB-INF/static/"/>

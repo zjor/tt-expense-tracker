@@ -1,9 +1,41 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="security" uri="http://www.springframework.org/security/tags" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<c:url var="logoutUrl" value="/j_spring_security_logout"/>
+<c:set var="baseURL"
+	   value="${fn:replace(pageContext.request.requestURL, pageContext.request.requestURI, pageContext.request.contextPath)}"/>
+
+<!DOCTYPE html>
 <html>
 <head>
-	<title></title>
+	<meta charset="utf-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+	<title>Expense Tracker</title>
+
+	<link rel="stylesheet" type="text/css" href="${baseURL}/static/css/semantic.css">
+
+	<script src="${baseURL}/static/js/jquery-2.0.3.js"></script>
+	<script src="${baseURL}/static/js/semantic.js"></script>
+
 </head>
 <body>
-<h1>Welcome</h1>
+<div class="ui two column grid">
+	<div class="three wide column">
+		<div class="ui horizontal inverted basic segment">
+			<h1 class="ui right aligned header">ExpenseTracker</h1>
+		</div>
+	</div>
+	<div class="column">
+		<div class="ui horizontal basic segment">
+			<h1 class="ui header">Expenses</h1>
+		</div>
+	</div>
+</div>
+
+<h1>Welcome, <security:authentication property="principal.email"/></h1>
+<a href="${logoutUrl}">Logout</a>
 </body>
 </html>

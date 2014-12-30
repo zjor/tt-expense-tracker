@@ -65,7 +65,7 @@
 						<input type="submit" class="ui submit button" value="Login">
 					</div>
 					<div class="right aligned column">
-						<a href="#">Create account</a>
+						<a href="${baseURL}/register">Create account</a>
 					</div>
 				</div>
 			</form>
