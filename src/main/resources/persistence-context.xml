@@ -12,6 +12,7 @@
     <jee:jndi-lookup id="dbUsername" jndi-name="java:comp/env/dbUsername" expected-type="java.lang.String"/>
     <jee:jndi-lookup id="dbPassword" jndi-name="java:comp/env/dbPassword" expected-type="java.lang.String"/>
 
+    <context:component-scan base-package="com.toptal.expensetracker.dao"/>
     <context:component-scan base-package="com.toptal.expensetracker.service"/>
 
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">

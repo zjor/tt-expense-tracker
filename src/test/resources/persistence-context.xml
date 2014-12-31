@@ -17,14 +17,13 @@
 
         <property name="jpaProperties">
             <props>
-                <prop key="hibernate.connection.driver_class">org.postgresql.Driver</prop>
-                <prop key="hibernate.connection.url">jdbc:postgresql://localhost/tt</prop>
-                <prop key="hibernate.connection.username">test</prop>
-                <prop key="hibernate.connection.password">testpassword</prop>
-                <prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQL82Dialect</prop>
+                <prop key="hibernate.connection.driver_class">org.h2.Driver</prop>
+                <prop key="hibernate.connection.url">jdbc:h2:mem:test</prop>
+                <prop key="hibernate.connection.username">sa</prop>
+                <prop key="hibernate.connection.password">p</prop>
+                <prop key="hibernate.dialect">org.hibernate.dialect.H2Dialect</prop>
                 <prop key="hibernate.hbm2ddl.auto">update</prop>
-                <prop key="hibernate.show_sql">false</prop>
-                <prop key="hibernate.default_schema">public</prop>
+                <prop key="hibernate.show_sql">true</prop>
             </props>
         </property>
     </bean>

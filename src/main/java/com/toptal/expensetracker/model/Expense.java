@@ -1,8 +1,8 @@
 package com.toptal.expensetracker.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Formula;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,7 +18,6 @@ import java.util.Date;
  */
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "expenses")
 public class Expense extends Model {
@@ -38,5 +37,17 @@ public class Expense extends Model {
 
     @Column(name = "timestamp", nullable = false)
     private Date timestamp;
+
+    @Formula("user_id")
+    private String userId;
+
+    public Expense(User user, String description, String comment, BigDecimal amount, Date timestamp) {
+        this.user = user;
+        this.description = description;
+        this.comment = comment;
+        this.amount = amount;
+        this.timestamp = timestamp;
+        userId = user.getId();
+    }
 
 }
