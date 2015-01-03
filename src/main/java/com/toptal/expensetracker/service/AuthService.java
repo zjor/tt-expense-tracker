@@ -1,7 +1,9 @@
 package com.toptal.expensetracker.service;
 
 import com.toptal.expensetracker.model.User;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,8 +33,13 @@ public class AuthService implements UserDetailsService {
         return new UserDetailsAdapter(user);
     }
 
+    public static User getUser() {
+        return ((AuthService.UserDetailsAdapter) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+    }
+
     public static class UserDetailsAdapter implements UserDetails {
 
+        @Getter
         private User user;
 
         public UserDetailsAdapter(User user) {
@@ -83,6 +90,7 @@ public class AuthService implements UserDetailsService {
         public boolean isEnabled() {
             return true;
         }
+
     }
 }
 

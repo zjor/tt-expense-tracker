@@ -63,7 +63,17 @@ public class ExpenseDaoTest {
         expenseDao.create(user, "description", null, BigDecimal.TEN, new Date(1L)).getId();
         expenseDao.create(user, "description", null, BigDecimal.TEN, new Date(2L)).getId();
         expenseDao.create(user, "description", null, BigDecimal.TEN, new Date(3L)).getId();
-        List<Expense> expenses = expenseDao.fetch(user.getId(), new Date(3L), new Date(1L), null);
+        List<Expense> expenses = expenseDao.fetch(user.getId(), new Date(3L), new Date(1L), null, null);
+        assertEquals(2, expenses.size());
+    }
+
+    @Test
+    public void fetchInRangeWithFilter() {
+        User user = userService.create("user@host.com", "s3cr3t");
+        expenseDao.create(user, "description", "McDouglas", BigDecimal.TEN, new Date(1L)).getId();
+        expenseDao.create(user, "McDonalds", null, BigDecimal.TEN, new Date(2L)).getId();
+        expenseDao.create(user, "description", null, BigDecimal.TEN, new Date(3L)).getId();
+        List<Expense> expenses = expenseDao.fetch(user.getId(), new Date(3L), new Date(1L), null, "%Mc%");
         assertEquals(2, expenses.size());
     }
 

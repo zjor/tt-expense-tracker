@@ -58,15 +58,17 @@ public class ExpenseDao {
     }
 
     /**
-     * Fetches expenses withing (after, before] time range sorted be timestamp in descending order.
+     * Fetches expenses within (after, before] time range sorted be timestamp in descending order.
+     * Filters expenses by string provided in filter parameter by description and comment fields.
      * If one of the time bounds is null then infinity is assumed
      * @param userId
      * @param after
      * @param before
      * @param limit
+     * @param filter
      * @return
      */
-    public List<Expense> fetch(String userId, Date after, Date before, Integer limit) {
+    public List<Expense> fetch(String userId, Date after, Date before, Integer limit, String filter) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Expense> query = cb.createQuery(Expense.class);
         Root<Expense> root = query.from(Expense.class);
@@ -80,6 +82,12 @@ public class ExpenseDao {
 
         if (before != null) {
             predicates.add(cb.greaterThanOrEqualTo(root.get(Expense_.timestamp), before));
+        }
+
+        if (filter != null) {
+            predicates.add(cb.or(
+                    cb.like(root.get(Expense_.description), filter),
+                    cb.like(root.get(Expense_.comment), filter)));
         }
 
         query.select(root)
