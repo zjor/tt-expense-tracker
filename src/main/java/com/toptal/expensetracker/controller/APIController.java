@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,7 +26,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author: Sergey Royz
@@ -57,7 +60,7 @@ public class APIController {
 
     @RequestMapping(value = "expenses", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
-    public ResponseEntity<ExpenseDTO> create(
+    public ExpenseDTO create(
             @RequestParam("description") String description,
             @RequestParam(value = "comment", required = false) String comment,
             @RequestParam("amount") BigDecimal amount,
@@ -66,8 +69,65 @@ public class APIController {
         User user = AuthService.getUser();
         Expense expense = expenseDao.create(user, description, comment, amount, new Date(timestamp));
 
-        return new ResponseEntity<>(ExpenseDTO.fromModel(expense), HttpStatus.CREATED);
+        return ExpenseDTO.fromModel(expense);
     }
+
+    @RequestMapping(value = "expenses/{id}", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @ResponseBody
+    public ResponseEntity<ExpenseDTO> edit(
+            @PathVariable("id") String id,
+            @RequestParam("description") String description,
+            @RequestParam(value = "comment", required = false) String comment,
+            @RequestParam("amount") BigDecimal amount,
+            @RequestParam("timestamp") Long timestamp) {
+
+        User user = AuthService.getUser();
+
+        Expense expense = expenseDao.get(id);
+        if (expense == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        if (!expense.getUserId().equals(user.getId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        expense.setDescription(description);
+        expense.setComment(comment);
+        expense.setAmount(amount);
+        expense.setTimestamp(new Date(timestamp));
+        expenseDao.update(expense);
+
+        return new ResponseEntity<>(ExpenseDTO.fromModel(expense), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "expenses/{id}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity delete(@PathVariable("id") String id) {
+        User user = AuthService.getUser();
+
+        Expense expense = expenseDao.get(id);
+        if (expense == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        if (!expense.getUserId().equals(user.getId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        expenseDao.delete(id);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "expenses", method = RequestMethod.GET)
+    @ResponseBody
+    public List<ExpenseDTO> fetch(
+            @RequestParam(value = "after", required = false) Long after,
+            @RequestParam(value = "limit", defaultValue = "10") Integer limit,
+            @RequestParam(value = "filter", required = false) String filter) {
+        String userId = AuthService.getUser().getId();
+        return ExpenseDTO.fromModel(expenseDao.fetch(userId, null, null, null, null));
+    }
+
 
     @Data
     @NoArgsConstructor
@@ -86,6 +146,14 @@ public class APIController {
                     model.getComment(),
                     model.getAmount(),
                     model.getTimestamp().getTime());
+        }
+
+        public static List<ExpenseDTO> fromModel(List<Expense> modelList) {
+            List<ExpenseDTO> result = new ArrayList<>(modelList.size());
+            for (Expense e : modelList) {
+                result.add(fromModel(e));
+            }
+            return result;
         }
     }
 }
