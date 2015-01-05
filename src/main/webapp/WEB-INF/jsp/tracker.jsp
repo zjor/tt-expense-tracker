@@ -57,32 +57,62 @@
 	</div>
 </div>
 
-<div class="ui modal" id="addDialog">
+<div class="ui modal" id="addDialog" ng-controller="addExpenseController">
 	<i class="close icon"></i>
 
 	<div class="header">
-		Profile Picture
+		Add Expense
 	</div>
 	<div class="content">
-		<div class="ui medium image">
-			<img src="/images/avatar/large/chris.jpg">
-		</div>
 		<div class="description">
-			<div class="ui header">We've auto-chosen a profile image for you.</div>
-			<p>We've grabbed the following image from the <a href="https://www.gravatar.com"
-															 target="_blank">gravatar</a> image associated with your
-				registered e-mail address.</p>
+			<div class="ui form">
+				<div class="required field">
+					<label>Description</label>
+					<input placeholder="Description" type="text" name="description" ng-model="expense.description">
+				</div>
 
-			<p>Is it okay to use this photo?</p>
+				<div class="required field">
+					<label>Amount</label>
+
+					<div class="two fields">
+						<div class="field">
+							<input placeholder="Amount" type="text" name="amount" ng-model="expense.amount">
+						</div>
+						<div class="field">
+							<select class="ui dropdown" ng-model="expense.currency">
+								<option value="usd">USD</option>
+								<option value="eur">EUR</option>
+								<option value="rub">RUB</option>
+								<option value="czk" selected>CZK</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="two fields">
+					<div class="required field">
+						<label>Date</label>
+						<input placeholder="MM/dd/yyyy" type="text" name="date" ng-model="expense.date">
+					</div>
+					<div class="required field">
+						<label>Time</label>
+						<input placeholder="HH:mm" type="text" name="time" ng-model="expense.time">
+					</div>
+				</div>
+
+				<div class="field">
+					<label>Comment</label>
+					<input placeholder="Comment" type="text" name="comment" ng-model="expense.comment">
+				</div>
+			</div>
 		</div>
 	</div>
 	<div class="actions">
 		<div class="ui black button">
-			Nope
+			Cancel
 		</div>
-		<div class="ui positive right labeled icon button">
-			Yep, that's me
-			<i class="checkmark icon"></i>
+		<div class="ui positive left labeled icon button" ng-click="add()">
+			Add
+			<i class="add circle icon"></i>
 		</div>
 	</div>
 </div>
@@ -117,19 +147,39 @@
 					});
 				}
 
+				function add(expense, callback) {
+					$http.post('${baseURL}/api/expenses', {description: expense.description, amount: expense.amount, timestamp: (new Date()).getTime(), comment: expense.comment}).success(function(data) {
+						callback();
+						load();
+					});
+
+				}
+
 				return {
 					expenses: expenses,
-					load: load
+					load: load,
+					add: add
 				}
 			}])
 			.controller('expensesListController', ['$scope', 'expensesStorage', function ($scope, expensesStorage) {
 				$scope.storage = expensesStorage;
 				expensesStorage.load();
+			}])
+			.controller('addExpenseController', ['$scope', 'expensesStorage', function ($scope, expensesStorage) {
+				$scope.expense = {};
+				$scope.add = function() {
+					expensesStorage.add($scope.expense, function(response) {
+						$('#addDialog').modal('hide');
+						$scope.expense = {};
+					});
+				}
+
 			}]);
 	$(function () {
-		$('#showAddDialog').click(function() {
-			$('#addDialog').modal('show');
+		$('#showAddDialog').click(function () {
+			$('#addDialog').modal({onApprove: function() {return false;}}).modal('show');
 		});
+		$('select.dropdown').dropdown();
 
 	});
 </script>

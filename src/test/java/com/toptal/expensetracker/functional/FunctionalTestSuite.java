@@ -53,7 +53,7 @@ public class FunctionalTestSuite {
             fail(httpResponse.getStatusLine().toString());
         }
         HttpPost createExpenseRequest = new HttpPost(SERVICE_URL + EXPENSES_PATH);
-        createExpenseRequest.setEntity(HttpRequestUtils.createUrlEncodedEntity("description", "Coffee 2 remove", "comment", "Starbucks", "amount", "15", "timestamp", "" + System.currentTimeMillis()));
+        createExpenseRequest.setEntity(HttpRequestUtils.createUrlEncodedEntity("description", "Tickets to museum", "comment", "National Museum of Technology", "amount", "5", "timestamp", "" + System.currentTimeMillis()));
         httpResponse = httpClient.execute(createExpenseRequest);
         System.out.println(httpResponse.getStatusLine());
         System.out.println(EntityUtils.toString(httpResponse.getEntity()));
