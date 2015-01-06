@@ -45,8 +45,9 @@
 			Add Expense
 		</div>
 		<div class="ui selection divided list" ng-controller="expensesListController">
-			<div class="item" ng-repeat="expense in storage.expenses">
+			<div class="item" ng-repeat="expense in storage.expenses" ng-click="onClick(expense)">
 				<div class="right floated compact ui">{{expense.amount | currency:"$":2}}</div>
+
 				<div class="content">
 					<div class="header">{{expense.description}}</div>
 					<div class="description">{{expense.timestamp | date:"MM/dd/yy h:mma"}} - {{expense.comment}}</div>
@@ -57,6 +58,7 @@
 	</div>
 </div>
 
+<%-- Add Expense Dialog--%>
 <div class="ui modal" id="addDialog" ng-controller="addExpenseController">
 	<i class="close icon"></i>
 
@@ -117,6 +119,66 @@
 	</div>
 </div>
 
+<%-- Edit & Remove Expense Dialog --%>
+<div class="ui modal" id="editDialog" ng-controller="editExpenseController">
+	<i class="close icon"></i>
+
+	<div class="header">
+		Edit Expense
+	</div>
+	<div class="content">
+		<div class="description">
+			<div class="ui form">
+				<div class="required field">
+					<label>Description</label>
+					<input placeholder="Description" type="text" name="description" ng-model="expense.description">
+				</div>
+
+				<div class="required field">
+					<label>Amount</label>
+
+					<div class="two fields">
+						<div class="field">
+							<input placeholder="Amount" type="text" name="amount" ng-model="expense.amount">
+						</div>
+						<div class="field">
+							<select class="ui dropdown" ng-model="expense.currency">
+								<option value="usd">USD</option>
+								<option value="eur">EUR</option>
+								<option value="rub">RUB</option>
+								<option value="czk" selected>CZK</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="two fields">
+					<div class="required field">
+						<label>Date</label>
+						<input placeholder="MM/dd/yyyy" type="text" name="date" ng-model="expense.date">
+					</div>
+					<div class="required field">
+						<label>Time</label>
+						<input placeholder="HH:mm" type="text" name="time" ng-model="expense.time">
+					</div>
+				</div>
+
+				<div class="field">
+					<label>Comment</label>
+					<input placeholder="Comment" type="text" name="comment" ng-model="expense.comment">
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="actions">
+		<div class="ui negative button" ng-click="delete(expense.id)">
+			Delete
+		</div>
+		<div class="ui positive button" ng-click="save()">
+			Save
+		</div>
+	</div>
+</div>
+
 <script src="${baseURL}/static/js/angular.min.js"></script>
 <script>
 	angular.module('tt-main', [])
@@ -135,6 +197,7 @@
 			}])
 			.factory('expensesStorage', ['$http', function ($http) {
 				var expenses = [];
+				var selection = {};
 
 				function load() {
 					$http.get('${baseURL}/api/expenses').success(function (expensesResponse) {
@@ -148,40 +211,101 @@
 				}
 
 				function add(expense, callback) {
-					$http.post('${baseURL}/api/expenses', {description: expense.description, amount: expense.amount, timestamp: (new Date()).getTime(), comment: expense.comment}).success(function(data) {
+					var params = {};
+
+					for (var attr in expense) {
+						if (expense.hasOwnProperty(attr)) params[attr] = expense[attr];
+					}
+					params.timestamp = (new Date()).getTime();
+
+					$http.post('${baseURL}/api/expenses', params)
+							.success(function () {
+								callback();
+								load();
+							});
+				}
+
+				function saveSelection(callback) {
+					$http.post('${baseURL}/api/expenses/' + selection.id, {description: selection.description, amount: selection.amount, timestamp: (new Date()).getTime(), comment: selection.comment})
+							.success(function () {
+								callback();
+								load();
+							});
+				}
+
+				function remove(id, callback) {
+					$http.delete('${baseURL}/api/expenses/' + id).success(function () {
+						for (var attr in selection) {
+							if (selection.hasOwnProperty(attr)) {
+								delete selection[attr];
+							}
+						}
 						callback();
 						load();
 					});
+				}
 
+				function select(expense) {
+					for (var attr in expense) {
+						if (expense.hasOwnProperty(attr)) selection[attr] = expense[attr];
+					}
 				}
 
 				return {
 					expenses: expenses,
+					selection: selection,
+					select: select,
 					load: load,
-					add: add
+					add: add,
+					remove: remove,
+					saveSelection: saveSelection
 				}
 			}])
 			.controller('expensesListController', ['$scope', 'expensesStorage', function ($scope, expensesStorage) {
 				$scope.storage = expensesStorage;
 				expensesStorage.load();
+				$scope.onClick = function (expense) {
+					expensesStorage.select(expense);
+					$('#editDialog').modal({onApprove: function () {
+						return false;
+					}, onDeny: function () {
+						return false;
+					}}).modal('show');
+				}
+
 			}])
 			.controller('addExpenseController', ['$scope', 'expensesStorage', function ($scope, expensesStorage) {
 				$scope.expense = {};
-				$scope.add = function() {
-					expensesStorage.add($scope.expense, function(response) {
+				$scope.add = function () {
+					expensesStorage.add($scope.expense, function (response) {
 						$('#addDialog').modal('hide');
 						$scope.expense = {};
 					});
 				}
-
+			}])
+			.controller('editExpenseController', ['$scope', 'expensesStorage', function ($scope, expensesStorage) {
+				$scope.expense = expensesStorage.selection;
+				$scope.save = function () {
+					expensesStorage.saveSelection(function() {
+						$('#editDialog').modal('hide');
+					});
+				}
+				$scope.delete = function (id) {
+					expensesStorage.remove(id, function () {
+						$('#editDialog').modal('hide');
+					});
+				}
 			}]);
+
 	$(function () {
 		$('#showAddDialog').click(function () {
-			$('#addDialog').modal({onApprove: function() {return false;}}).modal('show');
+			$('#addDialog').modal({onApprove: function () {
+				return false;
+			}}).modal('show');
 		});
 		$('select.dropdown').dropdown();
-
 	});
+
 </script>
 </body>
 </html>
