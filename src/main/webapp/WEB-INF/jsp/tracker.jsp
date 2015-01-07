@@ -39,7 +39,8 @@
 <a href="${logoutUrl}">Logout</a>
 
 <div class="ui centered page grid">
-	<div class="ui twelve wide column">
+	<div class="ui eight wide column">
+		<h2 class="ui header">Expenses</h2>
 
 		<div class="ui fluid icon input" ng-controller="filterController">
 			<input type="text" placeholder="Search..." ng-change="change()" ng-model="filter">
@@ -63,6 +64,35 @@
 
 			</div>
 		</div>
+	</div>
+	<div class="ui six wide column" ng-controller="reportController">
+		<h2 class="ui header">Weekly Report</h2>
+
+		<div class="ui icon button" ng-click="left()">
+			<i class="chevron left icon"></i>
+		</div>
+
+		<div class="ui large label">{{report.weekStart | date:"yyyy-MM-dd"}}</div>
+
+		<div class="ui icon button" ng-click="right()">
+			<i class="chevron right icon"></i>
+		</div>
+
+		<h3 class="ui header">Total: {{report.total | currency:"$":2}}</h3>
+
+		<h3 class="ui header">Average: {{report.average | currency:"$":2}}</h3>
+
+		<div class="ui selection divided list">
+			<div class="item" ng-repeat="expense in expenses">
+				<div class="right floated compact ui">{{expense.amount | currency:"$":2}}</div>
+
+				<div class="content">
+					<div class="header">[{{expense.timestamp | date:"MMM dd"}}] {{expense.description}}</div>
+				</div>
+
+			</div>
+		</div>
+
 	</div>
 </div>
 
@@ -275,6 +305,30 @@
 					saveSelection: saveSelection
 				}
 			}])
+			.factory('reportStorage', ['$http', function ($http) {
+				var params = {weekStart: (new Date()).getTime(), total: 0, average: 0};
+				var expenses = [];
+
+				function load() {
+					$http.get('${baseURL}/api/weekly?date=' + params.weekStart).success(function(report) {
+						params.total = report.total;
+						params.average = report.average;
+						params.weekStart = report.weekStart;
+
+						expenses.length = 0;
+						report.expenses.forEach(function (item) {
+							expenses.push(item)
+						});
+
+					});
+				}
+
+				return {
+					expenses: expenses,
+					params: params,
+					load: load
+				}
+			}])
 			.controller('expensesListController', ['$scope', 'expensesStorage', function ($scope, expensesStorage) {
 				$scope.storage = expensesStorage;
 				expensesStorage.load();
@@ -318,11 +372,26 @@
 			}])
 			.controller('filterController', ['$scope', 'expensesStorage', function ($scope, expensesStorage) {
 				$scope.filter = '';
-				$scope.change = function() {
+				$scope.change = function () {
 					expensesStorage.setFilter($scope.filter);
 					expensesStorage.load();
 					console.log($scope.filter);
 				}
+
+			}])
+			.controller('reportController', ['$scope', 'reportStorage', function($scope, reportStorage) {
+				reportStorage.load();
+
+				$scope.report = reportStorage.params;
+				$scope.expenses = reportStorage.expenses;
+
+				$scope.left = function() {
+					console.log(reportStorage);
+
+				};
+				$scope.right = function() {
+
+				};
 
 			}]);
 

@@ -143,7 +143,7 @@ public class APIController {
         for (Expense e: expenses) {
             total += e.getAmount().doubleValue();
         }
-        return new WeeklyReportDTO(total, expenses.isEmpty() ? 0.0 : total / expenses.size(), ExpenseDTO.fromModel(expenses));
+        return new WeeklyReportDTO(total, expenses.isEmpty() ? 0.0 : total / expenses.size(), ExpenseDTO.fromModel(expenses), expenseService.getNearestWeekStart(new Date()).getTime());
     }
 
 
@@ -182,5 +182,6 @@ public class APIController {
         private double total;
         private double average;
         private List<ExpenseDTO> expenses;
+        private long weekStart;
     }
 }
