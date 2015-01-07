@@ -386,11 +386,12 @@
 				$scope.expenses = reportStorage.expenses;
 
 				$scope.left = function() {
-					console.log(reportStorage);
-
+					reportStorage.params.weekStart -= 1;
+					reportStorage.load();
 				};
 				$scope.right = function() {
-
+					reportStorage.params.weekStart += 8*24*3600*1000;
+					reportStorage.load();
 				};
 
 			}]);
