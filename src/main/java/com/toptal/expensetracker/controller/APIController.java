@@ -1,6 +1,7 @@
 package com.toptal.expensetracker.controller;
 
 import com.toptal.expensetracker.dao.ExpenseDao;
+import com.toptal.expensetracker.logging.Log;
 import com.toptal.expensetracker.model.Expense;
 import com.toptal.expensetracker.model.User;
 import com.toptal.expensetracker.service.AuthService;
@@ -54,6 +55,7 @@ public class APIController {
     @Inject
     private ExpenseService expenseService;
 
+    @Log
     @RequestMapping(value = "login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
     public ResponseEntity login(@RequestParam("username") String username, @RequestParam("password") String password) {
@@ -67,6 +69,7 @@ public class APIController {
         }
     }
 
+    @Log
     @RequestMapping(value = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
     public ResponseEntity<String> register(@RequestParam("email") String email, @RequestParam("password") String password) {
@@ -81,6 +84,7 @@ public class APIController {
         return new ResponseEntity(HttpStatus.CREATED);
     }
 
+    @Log
     @RequestMapping(value = "unsubscribe", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity unsubscribe() {
@@ -89,7 +93,7 @@ public class APIController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-
+    @Log
     @RequestMapping(value = "expenses", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
     public ExpenseDTO create(
@@ -104,6 +108,7 @@ public class APIController {
         return ExpenseDTO.fromModel(expense);
     }
 
+    @Log
     @RequestMapping(value = "expenses/{id}", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
     public ResponseEntity<ExpenseDTO> edit(
@@ -133,6 +138,7 @@ public class APIController {
         return new ResponseEntity<>(ExpenseDTO.fromModel(expense), HttpStatus.OK);
     }
 
+    @Log
     @RequestMapping(value = "expenses/{id}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity delete(@PathVariable("id") String id) {
@@ -150,6 +156,7 @@ public class APIController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    @Log
     @RequestMapping(value = "expenses", method = RequestMethod.GET)
     @ResponseBody
     public List<ExpenseDTO> fetch(
@@ -163,6 +170,7 @@ public class APIController {
         return ExpenseDTO.fromModel(expenseDao.fetch(userId, null, null, limit, filter));
     }
 
+    @Log
     @RequestMapping(value = "weekly", method = RequestMethod.GET)
     @ResponseBody
     public WeeklyReportDTO weeklyReport(@RequestParam("date") Long date) {

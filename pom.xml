@@ -124,6 +124,12 @@
             <version>2.4.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.8.1</version>
+        </dependency>
+
         <!--Hibernate dependencies block-->
         <dependency>
             <groupId>org.hibernate</groupId>
