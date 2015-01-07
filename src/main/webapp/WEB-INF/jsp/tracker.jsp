@@ -50,7 +50,7 @@
 
 				<div class="content">
 					<div class="header">{{expense.description}}</div>
-					<div class="description">{{expense.timestamp | date:"MM/dd/yy h:mma"}} - {{expense.comment}}</div>
+					<div class="description">{{expense.timestamp | date:"MM/dd/yy h:mma"}} {{expense.comment}}</div>
 				</div>
 
 			</div>
@@ -76,28 +76,18 @@
 				<div class="required field">
 					<label>Amount</label>
 
-					<div class="two fields">
-						<div class="field">
-							<input placeholder="Amount" type="text" name="amount" ng-model="expense.amount">
-						</div>
-						<div class="field">
-							<select class="ui dropdown" ng-model="expense.currency">
-								<option value="usd">USD</option>
-								<option value="eur">EUR</option>
-								<option value="rub">RUB</option>
-								<option value="czk" selected>CZK</option>
-							</select>
-						</div>
+					<div class="field">
+						<input placeholder="Amount" type="text" name="amount" ng-model="expense.amount">
 					</div>
 				</div>
 				<div class="two fields">
 					<div class="required field">
 						<label>Date</label>
-						<input placeholder="MM/dd/yyyy" type="text" name="date" ng-model="expense.date">
+						<input placeholder="yyyy-MM-dd" type="text" name="date" ng-model="expense.date">
 					</div>
 					<div class="required field">
 						<label>Time</label>
-						<input placeholder="HH:mm" type="text" name="time" ng-model="expense.time">
+						<input placeholder="HH:mm:SS" type="text" name="time" ng-model="expense.time">
 					</div>
 				</div>
 
@@ -137,28 +127,18 @@
 				<div class="required field">
 					<label>Amount</label>
 
-					<div class="two fields">
-						<div class="field">
-							<input placeholder="Amount" type="text" name="amount" ng-model="expense.amount">
-						</div>
-						<div class="field">
-							<select class="ui dropdown" ng-model="expense.currency">
-								<option value="usd">USD</option>
-								<option value="eur">EUR</option>
-								<option value="rub">RUB</option>
-								<option value="czk" selected>CZK</option>
-							</select>
-						</div>
+					<div class="field">
+						<input placeholder="Amount" type="text" name="amount" ng-model="expense.amount">
 					</div>
 				</div>
 				<div class="two fields">
 					<div class="required field">
 						<label>Date</label>
-						<input placeholder="MM/dd/yyyy" type="text" name="date" ng-model="expense.date">
+						<input placeholder="yyyy-MM-dd" type="text" name="date" ng-model="expense.date">
 					</div>
 					<div class="required field">
 						<label>Time</label>
-						<input placeholder="HH:mm" type="text" name="time" ng-model="expense.time">
+						<input placeholder="HH:mm:SS" type="text" name="time" ng-model="expense.time">
 					</div>
 				</div>
 
@@ -199,6 +179,16 @@
 				var expenses = [];
 				var selection = {};
 
+				function prepareParams(obj) {
+					var params = {};
+
+					for (var attr in obj) {
+						if (obj.hasOwnProperty(attr)) params[attr] = obj[attr];
+					}
+					params.timestamp = Date.parse(obj.date + "T" + obj.time+"+01:00");
+					return params;
+				}
+
 				function load() {
 					$http.get('${baseURL}/api/expenses').success(function (expensesResponse) {
 						if (expensesResponse) {
@@ -216,9 +206,9 @@
 					for (var attr in expense) {
 						if (expense.hasOwnProperty(attr)) params[attr] = expense[attr];
 					}
-					params.timestamp = (new Date()).getTime();
+					params.timestamp = Date.parse(expense.date + "T" + expense.time);
 
-					$http.post('${baseURL}/api/expenses', params)
+					$http.post('${baseURL}/api/expenses', prepareParams(expense))
 							.success(function () {
 								callback();
 								load();
@@ -226,7 +216,7 @@
 				}
 
 				function saveSelection(callback) {
-					$http.post('${baseURL}/api/expenses/' + selection.id, {description: selection.description, amount: selection.amount, timestamp: (new Date()).getTime(), comment: selection.comment})
+					$http.post('${baseURL}/api/expenses/' + selection.id, prepareParams(selection))
 							.success(function () {
 								callback();
 								load();
@@ -248,6 +238,11 @@
 				function select(expense) {
 					for (var attr in expense) {
 						if (expense.hasOwnProperty(attr)) selection[attr] = expense[attr];
+					}
+					if (selection.hasOwnProperty('timestamp')) {
+						var d = (new Date(selection.timestamp));
+						selection.time = getTimeString(d);
+						selection.date = getDateString(d);
 					}
 				}
 
@@ -275,7 +270,13 @@
 
 			}])
 			.controller('addExpenseController', ['$scope', 'expensesStorage', function ($scope, expensesStorage) {
-				$scope.expense = {};
+				var d = new Date();
+
+				$scope.expense = {
+					time: getTimeString(d),
+					date: getDateString(d)
+				};
+
 				$scope.add = function () {
 					expensesStorage.add($scope.expense, function (response) {
 						$('#addDialog').modal('hide');
@@ -286,7 +287,7 @@
 			.controller('editExpenseController', ['$scope', 'expensesStorage', function ($scope, expensesStorage) {
 				$scope.expense = expensesStorage.selection;
 				$scope.save = function () {
-					expensesStorage.saveSelection(function() {
+					expensesStorage.saveSelection(function () {
 						$('#editDialog').modal('hide');
 					});
 				}
@@ -305,6 +306,21 @@
 		});
 		$('select.dropdown').dropdown();
 	});
+
+	function zeroPrefix(n) {
+		if (n < 10) {
+			return "0" + n;
+		}
+		return n;
+	}
+
+	function getTimeString(d) {
+		return zeroPrefix(d.getHours()) + ":" + zeroPrefix(d.getMinutes()) + ":" + zeroPrefix(d.getSeconds());
+	}
+
+	function getDateString(d) {
+		return d.getFullYear() + "-" + zeroPrefix(d.getMonth() + 1) + "-" + zeroPrefix(d.getDate());
+	}
 
 </script>
 </body>
