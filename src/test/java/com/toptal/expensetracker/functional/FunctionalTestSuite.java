@@ -26,6 +26,7 @@ public class FunctionalTestSuite {
     public static final String SERVICE_URL = "http://127.0.0.1:8080/expense-tracker/api";
     public static final String LOGIN_PATH = "/login";
     public static final String EXPENSES_PATH = "/expenses";
+    public static final String REPORT_PATH = "/weekly";
 
     public static final String USERNAME = "zjor";
     public static final String PASSWORD = "Gfhjkm1";
@@ -91,6 +92,18 @@ public class FunctionalTestSuite {
             fail(httpResponse.getStatusLine().toString());
         }
         HttpGet editRequest = new HttpGet(SERVICE_URL + EXPENSES_PATH);
+        httpResponse = httpClient.execute(editRequest);
+        System.out.println(httpResponse.getStatusLine());
+        System.out.println(EntityUtils.toString(httpResponse.getEntity()));
+    }
+
+    @Test
+    public void shouldReturnWeeklyReport() throws IOException {
+        HttpResponse httpResponse = httpClient.execute(createLoginRequest(USERNAME, PASSWORD));
+        if (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+            fail(httpResponse.getStatusLine().toString());
+        }
+        HttpGet editRequest = new HttpGet(SERVICE_URL + REPORT_PATH + "?date=" + System.currentTimeMillis());
         httpResponse = httpClient.execute(editRequest);
         System.out.println(httpResponse.getStatusLine());
         System.out.println(EntityUtils.toString(httpResponse.getEntity()));

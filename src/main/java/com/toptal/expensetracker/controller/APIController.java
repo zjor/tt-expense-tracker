@@ -4,6 +4,7 @@ import com.toptal.expensetracker.dao.ExpenseDao;
 import com.toptal.expensetracker.model.Expense;
 import com.toptal.expensetracker.model.User;
 import com.toptal.expensetracker.service.AuthService;
+import com.toptal.expensetracker.service.ExpenseService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,6 +45,9 @@ public class APIController {
 
     @Inject
     private ExpenseDao expenseDao;
+
+    @Inject
+    private ExpenseService expenseService;
 
     @RequestMapping(value = "login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
@@ -131,6 +135,17 @@ public class APIController {
         return ExpenseDTO.fromModel(expenseDao.fetch(userId, null, null, limit, filter));
     }
 
+    @RequestMapping(value = "weekly", method = RequestMethod.GET)
+    @ResponseBody
+    public WeeklyReportDTO weeklyReport(@RequestParam("date") Long date) {
+        List<Expense> expenses = expenseService.getExpensesOfWeek(AuthService.getUser().getId(), new Date(date));
+        double total = 0.0;
+        for (Expense e: expenses) {
+            total += e.getAmount().doubleValue();
+        }
+        return new WeeklyReportDTO(total, expenses.isEmpty() ? 0.0 : total / expenses.size(), ExpenseDTO.fromModel(expenses));
+    }
+
 
     @Data
     @NoArgsConstructor
@@ -158,5 +173,14 @@ public class APIController {
             }
             return result;
         }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class WeeklyReportDTO implements Serializable {
+        private double total;
+        private double average;
+        private List<ExpenseDTO> expenses;
     }
 }
