@@ -10,6 +10,7 @@ import org.springframework.test.context.transaction.TransactionConfiguration;
 import javax.inject.Inject;
 
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 
 /**
  * @author: Sergey Royz
@@ -30,5 +31,18 @@ public class UserServiceTest {
         User user = userService.findByEmail(email);
         assertNotNull(user);
     }
+
+    @Test
+    public void shouldRemove() {
+        String email = "user@host.com";
+        userService.create(email, "s3cr3t");
+        User user = userService.findByEmail(email);
+        assertNotNull(user);
+
+        userService.remove(user);
+        user = userService.findByEmail(email);
+        assertNull(user);
+    }
+
 
 }

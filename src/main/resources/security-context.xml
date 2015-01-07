@@ -12,6 +12,7 @@
         <intercept-url pattern="/" access="permitAll"/>
         <intercept-url pattern="/register" access="permitAll"/>
         <intercept-url pattern="/api/login" access="permitAll"/>
+        <intercept-url pattern="/api/register" access="permitAll"/>
         <intercept-url pattern="/static/**" access="permitAll"/>
         <intercept-url pattern="/**" access="authenticated"/>
         <form-login

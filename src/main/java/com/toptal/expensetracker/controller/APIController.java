@@ -5,9 +5,11 @@ import com.toptal.expensetracker.model.Expense;
 import com.toptal.expensetracker.model.User;
 import com.toptal.expensetracker.service.AuthService;
 import com.toptal.expensetracker.service.ExpenseService;
+import com.toptal.expensetracker.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +49,9 @@ public class APIController {
     private ExpenseDao expenseDao;
 
     @Inject
+    private UserService userService;
+
+    @Inject
     private ExpenseService expenseService;
 
     @RequestMapping(value = "login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -61,6 +66,29 @@ public class APIController {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
     }
+
+    @RequestMapping(value = "register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @ResponseBody
+    public ResponseEntity<String> register(@RequestParam("email") String email, @RequestParam("password") String password) {
+        if (!EmailValidator.getInstance().isValid(email)) {
+            return new ResponseEntity("Provided email is not valid", HttpStatus.BAD_REQUEST);
+        }
+
+        if (userService.findByEmail(email) != null) {
+            return new ResponseEntity("Email is not available", HttpStatus.BAD_REQUEST);
+        }
+        userService.create(email, password);
+        return new ResponseEntity(HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value = "unsubscribe", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity unsubscribe() {
+        User user = AuthService.getUser();
+        userService.remove(user);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
 
     @RequestMapping(value = "expenses", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody

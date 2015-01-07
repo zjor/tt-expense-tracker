@@ -33,10 +33,6 @@ public class UserService {
         return user;
     }
 
-    public User findById(String id) {
-        return em.find(User.class, id);
-    }
-
     public User findByEmail(String email) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<User> query = cb.createQuery(User.class);
@@ -46,18 +42,9 @@ public class UserService {
         return result.isEmpty() ? null : result.get(0);
     }
 
-    public User authenticate(String email, String password) {
-        User user = findById(email);
-        if (user == null) {
-            return null;
-        }
-
-        //TODO: hash & salt
-        if (user.getPasswordHash().equals(password)) {
-            return user;
-        } else {
-            return null;
-        }
+    @Transactional
+    public void remove(User user) {
+        em.remove(em.contains(user) ? user : em.merge(user));
     }
 
 

@@ -22,7 +22,7 @@
 
 </head>
 <body>
-<div class="ui two column grid">
+<div class="ui three column grid">
 	<div class="three wide column">
 		<div class="ui horizontal inverted basic segment">
 			<h1 class="ui right aligned header">ExpenseTracker</h1>
@@ -33,10 +33,15 @@
 			<h1 class="ui header">Expenses</h1>
 		</div>
 	</div>
+	<div class="column">
+		<div class="ui right aligned basic segment">
+			<div class="ui label">
+				Welcome, <security:authentication property="principal.email"/>
+				<a class="detail" href="${logoutUrl}"><i class="sign out icon"></i></a>
+			</div>
+		</div>
+	</div>
 </div>
-
-<h1>Welcome, <security:authentication property="principal.email"/></h1>
-<a href="${logoutUrl}">Logout</a>
 
 <div class="ui centered page grid">
 	<div class="ui eight wide column">
@@ -342,7 +347,7 @@
 				}
 
 			}])
-			.controller('addExpenseController', ['$scope', 'expensesStorage', function ($scope, expensesStorage) {
+			.controller('addExpenseController', ['$scope', 'expensesStorage', 'reportStorage', function ($scope, expensesStorage, reportStorage) {
 				var d = new Date();
 
 				$scope.expense = {
@@ -352,20 +357,23 @@
 
 				$scope.add = function () {
 					expensesStorage.add($scope.expense, function (response) {
+						reportStorage.load();
 						$('#addDialog').modal('hide');
 						$scope.expense = {};
 					});
 				}
 			}])
-			.controller('editExpenseController', ['$scope', 'expensesStorage', function ($scope, expensesStorage) {
+			.controller('editExpenseController', ['$scope', 'expensesStorage', 'reportStorage', function ($scope, expensesStorage, reportStorage) {
 				$scope.expense = expensesStorage.selection;
 				$scope.save = function () {
 					expensesStorage.saveSelection(function () {
+						reportStorage.load();
 						$('#editDialog').modal('hide');
 					});
 				}
 				$scope.delete = function (id) {
 					expensesStorage.remove(id, function () {
+						reportStorage.load();
 						$('#editDialog').modal('hide');
 					});
 				}
