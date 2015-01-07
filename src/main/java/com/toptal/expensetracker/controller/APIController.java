@@ -125,7 +125,10 @@ public class APIController {
             @RequestParam(value = "limit", defaultValue = "10") Integer limit,
             @RequestParam(value = "filter", required = false) String filter) {
         String userId = AuthService.getUser().getId();
-        return ExpenseDTO.fromModel(expenseDao.fetch(userId, null, null, null, null));
+        if (filter != null && filter.length() > 0) {
+            filter = '%' + filter + '%';
+        }
+        return ExpenseDTO.fromModel(expenseDao.fetch(userId, null, null, limit, filter));
     }
 
 

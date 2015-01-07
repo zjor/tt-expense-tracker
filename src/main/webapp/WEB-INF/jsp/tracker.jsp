@@ -40,9 +40,17 @@
 
 <div class="ui centered page grid">
 	<div class="ui twelve wide column">
-		<div class="ui basic button" id="showAddDialog">
-			<i class="add circle icon"></i>
-			Add Expense
+
+		<div class="ui fluid icon input" ng-controller="filterController">
+			<input type="text" placeholder="Search..." ng-change="change()" ng-model="filter">
+			<i class="search icon"></i>
+		</div>
+
+		<div class="ui basic segment">
+			<div class="ui basic button" id="showAddDialog">
+				<i class="add circle icon"></i>
+				Add Expense
+			</div>
 		</div>
 		<div class="ui selection divided list" ng-controller="expensesListController">
 			<div class="item" ng-repeat="expense in storage.expenses" ng-click="onClick(expense)">
@@ -178,6 +186,7 @@
 			.factory('expensesStorage', ['$http', function ($http) {
 				var expenses = [];
 				var selection = {};
+				var filter = '';
 
 				function prepareParams(obj) {
 					var params = {};
@@ -185,12 +194,17 @@
 					for (var attr in obj) {
 						if (obj.hasOwnProperty(attr)) params[attr] = obj[attr];
 					}
-					params.timestamp = Date.parse(obj.date + "T" + obj.time+"+01:00");
+					params.timestamp = Date.parse(obj.date + "T" + obj.time + "+01:00");
 					return params;
 				}
 
 				function load() {
-					$http.get('${baseURL}/api/expenses').success(function (expensesResponse) {
+					var params = '?';
+					if (filter.length > 0) {
+						params = '?filter=' + encodeURIComponent(filter);
+					}
+
+					$http.get('${baseURL}/api/expenses' + params).success(function (expensesResponse) {
 						if (expensesResponse) {
 							expenses.length = 0;
 							expensesResponse.forEach(function (item) {
@@ -246,9 +260,14 @@
 					}
 				}
 
+				function setFilter(value) {
+					filter = value;
+				}
+
 				return {
 					expenses: expenses,
 					selection: selection,
+					setFilter: setFilter,
 					select: select,
 					load: load,
 					add: add,
@@ -296,6 +315,15 @@
 						$('#editDialog').modal('hide');
 					});
 				}
+			}])
+			.controller('filterController', ['$scope', 'expensesStorage', function ($scope, expensesStorage) {
+				$scope.filter = '';
+				$scope.change = function() {
+					expensesStorage.setFilter($scope.filter);
+					expensesStorage.load();
+					console.log($scope.filter);
+				}
+
 			}]);
 
 	$(function () {
