@@ -359,7 +359,10 @@
 					expensesStorage.add($scope.expense, function (response) {
 						reportStorage.load();
 						$('#addDialog').modal('hide');
-						$scope.expense = {};
+						$scope.expense = {
+							time: getTimeString(d),
+							date: getDateString(d)
+						};
 					});
 				}
 			}])

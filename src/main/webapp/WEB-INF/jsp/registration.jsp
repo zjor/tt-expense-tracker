@@ -41,18 +41,8 @@
 			<form name="form" class = "ui error form" method="post" ng-controller="registrationController" novalidate>
 				<h4 class="ui dividing header">Creating an account</h4>
 
-				<div class="ui error message">
-					<div class="header">The email is not available</div>
-					<p>Please use another one.</p>
-				</div>
-
-				<div class="ui message" ng-show="form.$error">
-					<div class="header">We had some issues</div>
-					<ul class="list">
-						<li ng-show="form.email.$error.email">Please enter a valid email</li>
-						<li ng-show="form.password.$error">Please enter password</li>
-						<li ng-show="form.confirm != form.password">Please confirm password</li>
-					</ul>
+				<div class="ui error message" ng-show="error.show">
+					<div class="header">{{error.message}}</div>
 				</div>
 
 				<div class="required field">
@@ -90,15 +80,23 @@
 			});
 		}])
 		.controller('registrationController', ['$scope', '$http', function($scope, $http) {
-				var submissionURL = '${baseURL}/register';
+				var submissionURL = '${baseURL}/api/register';
+
+				$scope.error = {show: false, message:''};
+				$scope.data = {password: '', confirm: ''};
 
 				$scope.submit = function(data) {
+					if (data.password.length == 0 || data.password != data.confirm) {
+						$scope.error = {show: true, message:"Passwords doesn't match"};
+						return;
+					}
+
 					$http.post(submissionURL, {email: data.email, password: data.password})
-							.success(function(data, status, headers, config) {
-								console.log(data);
+							.success(function(data, status) {
+								window.location = "${baseURL}";
 							})
-							.error(function(data, status, headers, config) {
-								console.log(data);
+							.error(function(data) {
+								$scope.error = {show: true, message: data};
 							});
 					return false;
 				}
